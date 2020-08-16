@@ -1,4 +1,4 @@
-shandy,Dragon's Breath,5.91
+shandy,Dragon's Breath,6.0
 elixir,shirley temple,4.12
 meal,goblet of la croix,1.22
 desert dessert,pickled camel hump,7.33

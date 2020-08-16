@@ -10,14 +10,16 @@ val patronList = mutableListOf("Eli", "Mordoc", "Sophie")
 val lastName = listOf("Ironfoot", "Fernsworth", "Baggins")
 val uniquePatrons = mutableSetOf<String>()
 
+val patronGold = mutableMapOf<String, Double>()
+
 val helloString = "*** Welcome to Taernyl's Folly ***"
 val menuList = File("data/tavern-menu-data.txt")
         .readText()
         .split('\n')
         .sorted()
 
-private fun addDot(first: String, last: String, size: Int): String{
-    var dotString : String = first
+private fun addDot(first: String, last: String, size: Int): String {
+    var dotString: String = first
     (0..size - first.length - last.length).forEach { dotString += '.' }
     return dotString + last
 }
@@ -43,7 +45,9 @@ fun main(args: Array<String>) {
         uniquePatrons += name
     }
 
-    println(uniquePatrons)
+    uniquePatrons.forEach {
+        patronGold[it] = 6.0
+    }
 
     var orderCount = 0
     while (orderCount <= 9) {
@@ -52,7 +56,27 @@ fun main(args: Array<String>) {
         println()
         orderCount++
     }
+    bugai()
+    displayPatronBalances()
 
+}
+
+private fun bugai() {
+    val listPure = mutableListOf<String>()
+    patronGold.forEach { patron, balance ->
+        if (balance == 0.0)
+            listPure += patron
+    }
+    listPure.forEach {
+        patronGold.remove(it)
+    }
+}
+
+private fun displayPatronBalances() {
+    println("Patrons Balance:\n")
+    patronGold.forEach { patron, balance ->
+        println("$patron, balance: ${"%.2f".format(balance)}")
+    }
 }
 
 private fun printMenu() {
@@ -69,29 +93,13 @@ private fun printMenu() {
     println()
 }
 
-private fun performPurchase(price: Double): Boolean {
-    displayBalance()
-    val totalPurse = playerGold + (playerSilver / 100.0)
-    println("Total purse: $totalPurse")
-    println("Purchasing item for $price")
-
-    val remaningBalance = totalPurse - price
-    println("Remaining balance: ${"%.2f".format(remaningBalance)}")
-
-    if (remaningBalance <= 0)
-        return false
-
-    val remainingGold = remaningBalance.toInt()
-    val remainingSilver = (remaningBalance % 1 * 100).roundToInt()
-    playerGold = remainingGold
-    playerSilver = remainingSilver
-    displayBalance()
-
-    return true
-}
-
-private fun displayBalance() {
-    println("Player's purse balance: Gold: $playerGold, Silver: $playerSilver")
+fun performPurchase(price: Double, patronName: String): Boolean {
+    val totalPurse = patronGold.getValue(patronName)
+    if (totalPurse >= price) {
+        patronGold[patronName] = totalPurse - price
+        return true
+    }
+    return false
 }
 
 private fun placeOrder(patronName: String, menuData: String) {
@@ -101,19 +109,19 @@ private fun placeOrder(patronName: String, menuData: String) {
 
     val (type, name, price) = menuData.split(',')
 
-//    if (performPurchase(price.toDouble())) {
-    val message = "$patronName buys a $name ($type) for $price."
-    println(message)
-    val phrase = if (name == "Dragon's Breath") {
-        "$patronName exclaims: ${toDragonSpeak("AH, DELICIOUS $name!")}"
+    if (performPurchase(price.toDouble(), patronName)) {
+        val message = "$patronName buys a $name ($type) for $price."
+        println(message)
+        val phrase = if (name == "Dragon's Breath") {
+            "$patronName exclaims: ${toDragonSpeak("AH, DELICIOUS $name!")}"
+        } else {
+            "$patronName says: Thanks for the $name!."
+        }
+        println(phrase)
     } else {
-        "$patronName says: Thanks for the $name!."
+        val message = "$patronName can't buys a $name ($type) for $price."
+        println(message)
     }
-    println(phrase)
-//    } else {
-//        val message = "Madrigal can't buys a $name ($type) for $price."
-//        println(message)
-//    }
 }
 
 private fun toDragonSpeak(phrase: String) =
