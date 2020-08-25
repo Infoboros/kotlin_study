@@ -1,6 +1,7 @@
 package com.bignerdranch.nyethack
 
 import java.io.File
+import com.bignerdranch.nyethack.Coordinate as Coordinate
 
 class Player(_name: String = "madrigal",
              var healthPoints: Int = 89,
@@ -13,6 +14,7 @@ class Player(_name: String = "madrigal",
         }
 
     val hometown by lazy { selectHometown() }
+    var currentPosition = Coordinate(0, 0)
 
     init {
         require(healthPoints > 0, { "healthPoints must be greater than zero." })
